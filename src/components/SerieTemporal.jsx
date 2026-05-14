@@ -1,10 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { formatearARS } from '../data/mockData';
-
-function formatFecha(fechaStr) {
-  const date = new Date(fechaStr);
-  return date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
-}
+import { formatearARS, formatearFechaCorta } from '../lib/datos';
 
 export default function SerieTemporal({ data }) {
   if (!data || data.length === 0) {
@@ -24,7 +19,7 @@ export default function SerieTemporal({ data }) {
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis 
             dataKey="fecha" 
-            tickFormatter={formatFecha}
+            tickFormatter={formatearFechaCorta}
             stroke="#9ca3af"
             fontSize={12}
           />
@@ -34,8 +29,11 @@ export default function SerieTemporal({ data }) {
             fontSize={12}
           />
           <Tooltip 
-            formatter={(value, name) => [formatearARS(value), name === 'ingreso' ? 'Ingresos' : 'Egresos']}
-            labelFormatter={formatFecha}
+            formatter={(value, name) => [
+              formatearARS(value), 
+              name === 'ingreso' ? 'Ingresos' : name === 'egreso' ? 'Egresos' : name
+            ]}
+            labelFormatter={formatearFechaCorta}
             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
           />
           <Legend />
@@ -48,15 +46,17 @@ export default function SerieTemporal({ data }) {
             dot={{ fill: '#22c55e', r: 4 }}
             activeDot={{ r: 6 }}
           />
-          <Line 
-            type="monotone" 
-            dataKey="egreso" 
-            name="Egresos"
-            stroke="#ef4444" 
-            strokeWidth={2}
-            dot={{ fill: '#ef4444', r: 4 }}
-            activeDot={{ r: 6 }}
-          />
+          {data[0]?.egreso !== undefined && (
+            <Line 
+              type="monotone" 
+              dataKey="egreso" 
+              name="Egresos"
+              stroke="#ef4444" 
+              strokeWidth={2}
+              dot={{ fill: '#ef4444', r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>
