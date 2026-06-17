@@ -40,23 +40,14 @@ export default function SerieTemporal({ data }) {
           <Line 
             type="monotone" 
             dataKey="ingreso" 
-            name="Ingresos"
+            name="Movimientos"
             stroke="#22c55e" 
             strokeWidth={2}
             dot={{ fill: '#22c55e', r: 4 }}
             activeDot={{ r: 6 }}
           />
-          {data[0]?.egreso !== undefined && (
-            <Line 
-              type="monotone" 
-              dataKey="egreso" 
-              name="Egresos"
-              stroke="#ef4444" 
-              strokeWidth={2}
-              dot={{ fill: '#ef4444', r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          )}
+       
+          )
         </LineChart>
       </ResponsiveContainer>
     </div>

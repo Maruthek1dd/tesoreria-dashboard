@@ -12,9 +12,7 @@ export function useResumen() {
     try {
       const result = await api.getResumen();
       setData(result);
-      console.log('[useResumen] Datos recibidos:', result);
     } catch (err) {
-      console.error('[useResumen] Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -38,10 +36,8 @@ export function useSinCobrar() {
     setError(null);
     try {
       const result = await api.getSinCobrar();
-      console.log('[useSinCobrar] Datos recibidos:', result);
       setData(result);
     } catch (err) {
-      console.error('[useSinCobrar] Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -65,10 +61,8 @@ export function useProveedores() {
     setError(null);
     try {
       const result = await api.getProveedores();
-      console.log('[useProveedores] Datos recibidos:', result);
       setData(result);
     } catch (err) {
-      console.error('[useProveedores] Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -92,10 +86,8 @@ export function useChequesCobrados() {
     setError(null);
     try {
       const result = await api.getCobrados();
-      console.log('[useChequesCobrados] Datos recibidos:', result);
       setData(result);
     } catch (err) {
-      console.error('[useChequesCobrados] Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);

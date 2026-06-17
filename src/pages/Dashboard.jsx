@@ -2,13 +2,16 @@ import CardResumen from '../components/CardResumen';
 import SerieTemporal from '../components/SerieTemporal';
 import ListaRazonesSociales from '../components/ListaRazonesSociales';
 import ChequesNoCobrados from '../components/ChequesNoCobrados';
+import CargaArchivoBanco from '../components/CargaArchivoBanco';
 import { useResumen, useSinCobrar, useProveedores, useChequesCobrados } from '../hooks/useDashboardData';
+import { uploadFile } from '../services/api';
 import { 
   formatearARS, 
   calcularSerieTemporalDesdeCobrados, 
   getColorForSaldo,
   getChequesQueVencenManana,
-  getChequesQueVencenEstaSemana
+  getChequesQueVencenEstaSemana,
+  procesarChequesNoCobrados
 } from '../lib/datos';
 
 function LoadingSpinner() {
@@ -107,6 +110,10 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-gray-900">Tesorería Dashboard</h1>
           <p className="text-gray-500 text-sm">Gestión de liquidez empresarial</p>
         </div>
+
+        <div className="mb-4">
+          <CargaArchivoBanco onUpload={uploadFile} />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <CardResumen 
@@ -163,75 +170,3 @@ export default function Dashboard() {
   );
 }
 
-function procesarChequesNoCobrados(cheques) {
-  const grouped = {};
-  
-  cheques.forEach(cheque => {
-    const razonSocial = cheque.RAZON_SOCIAL || 'Sin especificar';
-    
-    if (!grouped[razonSocial]) {
-      grouped[razonSocial] = [];
-    }
-    
-    grouped[razonSocial].push({
-      id: cheque.NUMERO,
-      monto: cheque.IMPORTE,
-      fechaAcreditacion: cheque.FECHA_ACREDITACION
-    });
-  });
-
-  return Object.entries(grouped)
-    .map(([razonSocial, chequesArray]) => {
-      const sortedCheques = [...chequesArray].sort((a, b) => {
-        const diasA = getDiasRestantesDate(a.fechaAcreditacion);
-        const diasB = getDiasRestantesDate(b.fechaAcreditacion);
-        if (diasA === null) return 1;
-        if (diasB === null) return -1;
-        return diasA - diasB;
-      });
-      
-      const total = sortedCheques.reduce((sum, c) => sum + c.monto, 0);
-      const menorDias = sortedCheques.find(c => getDiasRestantesDate(c.fechaAcreditacion) !== null)?.diasRestantes ?? 999;
-      
-      return {
-        razonSocial,
-        cheques: sortedCheques.map(c => ({
-          ...c,
-          diasRestantes: getDiasRestantesDate(c.fechaAcreditacion)
-        })),
-        total,
-        menorDiasRestantes: menorDias
-      };
-    })
-    .sort((a, b) => {
-      if (a.menorDiasRestantes === 999) return 1;
-      if (b.menorDiasRestantes === 999) return -1;
-      return a.menorDiasRestantes - b.menorDiasRestantes;
-    });
-}
-
-function getDiasRestantesDate(fechaAcreditacion) {
-  if (!fechaAcreditacion) return null;
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const fecha = parsearFechaLocal(fechaAcreditacion);
-  if (!fecha) return null;
-  const diffTime = fecha - hoy;
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
-
-function parsearFechaLocal(fecha) {
-  if (!fecha) return null;
-  if (typeof fecha === 'object' && fecha instanceof Date) return fecha;
-  
-  if (typeof fecha === 'string' && fecha.includes('/')) {
-    const parts = fecha.split('/');
-    if (parts.length === 3) {
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const year = parseInt(parts[2], 10);
-      return new Date(year, month, day);
-    }
-  }
-  return null;
-}

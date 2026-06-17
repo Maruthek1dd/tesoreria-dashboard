@@ -177,3 +177,41 @@ export function getColorClass(color) {
 export function getColorForSaldo(saldo) {
   return saldo >= 0 ? 'green' : 'red';
 }
+
+export function procesarChequesNoCobrados(cheques) {
+  const grouped = {};
+
+  cheques.forEach(cheque => {
+    const razonSocial = cheque.RAZON_SOCIAL || 'Sin especificar';
+
+    if (!grouped[razonSocial]) {
+      grouped[razonSocial] = [];
+    }
+
+    grouped[razonSocial].push({
+      id: cheque.NUMERO,
+      monto: cheque.IMPORTE,
+      fechaAcreditacion: cheque.FECHA_ACREDITACION
+    });
+  });
+
+  return Object.entries(grouped)
+    .map(([razonSocial, chequesArray]) => {
+      const sortedCheques = [...chequesArray].sort((a, b) => {
+        const fechaA = parsearFecha(a.fechaAcreditacion);
+        const fechaB = parsearFecha(b.fechaAcreditacion);
+        if (!fechaA) return 1;
+        if (!fechaB) return -1;
+        return fechaB - fechaA;
+      });
+
+      const total = sortedCheques.reduce((sum, c) => sum + c.monto, 0);
+
+      return {
+        razonSocial,
+        cheques: sortedCheques,
+        total
+      };
+    })
+    .sort((a, b) => a.razonSocial.localeCompare(b.razonSocial));
+}

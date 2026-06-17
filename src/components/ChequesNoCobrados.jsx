@@ -1,13 +1,5 @@
 import { formatearARS, formatearFecha } from '../lib/datos';
 
-function getDiasRestantesClass(dias) {
-  if (dias === null || dias === undefined) return 'normal';
-  if (dias < 0) return 'vencido';
-  if (dias <= 3) return 'urgente';
-  if (dias <= 7) return 'alerta';
-  return 'normal';
-}
-
 export default function ChequesNoCobrados({ data }) {
   if (!data || data.length === 0) {
     return (
@@ -28,40 +20,15 @@ export default function ChequesNoCobrados({ data }) {
               {grupo.razonSocial}
             </h3>
             <div className="space-y-1">
-              {grupo.cheques.map((cheque, cIdx) => {
-                const diasClass = getDiasRestantesClass(cheque.diasRestantes);
-                const diasText = cheque.diasRestantes === null 
-                  ? formatearFecha(cheque.fechaAcreditacion)
-                  : diasClass === 'vencido'
-                    ? 'Vencido'
-                    : diasClass === 'urgente'
-                      ? `${cheque.diasRestantes}d (urgente)`
-                      : `${cheque.diasRestantes} días`;
-                
-                return (
-                  <div 
-                    key={cIdx}
-                    className={`flex justify-between items-center text-sm px-2 py-1 rounded ${
-                      diasClass === 'urgente' ? 'bg-orange-50' :
-                      diasClass === 'alerta' ? 'bg-yellow-50' :
-                      diasClass === 'vencido' ? 'bg-red-50' :
-                      ''
-                    }`}
-                  >
-                    <span className="text-gray-700">
-                      {formatearARS(cheque.monto)}
-                    </span>
-                    <span className={`text-xs ml-2 ${
-                      diasClass === 'vencido' ? 'text-red-600 font-medium' :
-                      diasClass === 'urgente' ? 'text-orange-600 font-medium' :
-                      diasClass === 'alerta' ? 'text-yellow-600' :
-                      'text-gray-400'
-                    }`}>
-                      {diasText}
-                    </span>
-                  </div>
-                );
-              })}
+              {grupo.cheques.map((cheque, cIdx) => (
+                <div
+                  key={cIdx}
+                  className="flex justify-between items-center text-sm px-2 py-1"
+                >
+                  <span className="text-gray-700">{formatearARS(cheque.monto)}</span>
+                  <span className="text-xs text-gray-400">{formatearFecha(cheque.fechaAcreditacion)}</span>
+                </div>
+              ))}
             </div>
             <div className="mt-2 pt-2 border-t border-gray-100 flex justify-between font-medium">
               <span className="text-gray-600">Total:</span>
