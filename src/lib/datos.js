@@ -178,6 +178,14 @@ export function getColorForSaldo(saldo) {
   return saldo >= 0 ? 'green' : 'red';
 }
 
+export function filtrarPorRazonSocial(items, texto) {
+  if (!texto || !texto.trim()) return items;
+  const lower = texto.toLowerCase();
+  return items.filter(item =>
+    item.razonSocial.toLowerCase().includes(lower)
+  );
+}
+
 export function procesarChequesNoCobrados(cheques) {
   const grouped = {};
 
